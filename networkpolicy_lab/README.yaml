@@ -1,0 +1,16 @@
+kubectl exec -n frontend -it frontend-pod  -- /bin/sh
+PING 172.17.0.7 (172.17.0.7): 56 data bytes
+64 bytes from 172.17.0.7: seq=0 ttl=64 time=0.133 ms
+
+--- 172.17.0.7 ping statistics ---
+1 packets transmitted, 1 packets received, 0% packet loss
+round-trip min/avg/max = 0.133/0.133/0.133 ms
+PING 172.17.0.7 (172.17.0.7): 56 data bytes
+64 bytes from 172.17.0.7: seq=0 ttl=64 time=0.110 ms
+
+--- 172.17.0.7 ping statistics ---
+1 packets transmitted, 1 packets received, 0% packet loss
+round-trip min/avg/max = 0.110/0.110/0.110 ms
+
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.5/manifests/tigera-operator.yaml
+

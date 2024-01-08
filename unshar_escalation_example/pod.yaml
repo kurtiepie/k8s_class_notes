@@ -1,0 +1,15 @@
+# capsh --print | grep --color=auto cap_sys_admin
+apiVersion: v1
+kind: Pod
+metadata:
+  name: protected
+spec:
+  containers:
+    - name: protected
+      image: localhost:5001/getcaps:0.3
+      securityContext:
+        privileged: false
+          #        seccompProfile:
+          #          type: RuntimeDefault
+      command: [ "/bin/sh", "-c", "--" ]
+      args: [ "sleep 360" ]

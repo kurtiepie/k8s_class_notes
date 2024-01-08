@@ -1,0 +1,142 @@
+---
+# Source: headerschart/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: RELEASE-NAME-headerschart
+  labels:
+    helm.sh/chart: headerschart-0.1.0
+    app.kubernetes.io/name: headerschart
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: headerschart/templates/envsecrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: RELEASE-NAME-env
+data:
+  port: NDU2Nzg=
+---
+# Source: headerschart/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: RELEASE-NAME-headerschart
+  labels:
+    helm.sh/chart: headerschart-0.1.0
+    app.kubernetes.io/name: headerschart
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: headerschart
+    app.kubernetes.io/instance: RELEASE-NAME
+---
+# Source: headerschart/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: RELEASE-NAME-headerschart
+  labels:
+    helm.sh/chart: headerschart-0.1.0
+    app.kubernetes.io/name: headerschart
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: headerschart
+      app.kubernetes.io/instance: RELEASE-NAME
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: headerschart
+        app.kubernetes.io/instance: RELEASE-NAME
+    spec:
+      serviceAccountName: RELEASE-NAME-headerschart
+      securityContext:
+        {}
+      containers:
+        - name: headerschart
+          securityContext:
+            {}
+          image: "localhost:5001/headers:0.1"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: "PORT"
+              valueFrom:
+                secretKeyRef:
+                  key: port
+                  name: RELEASE-NAME-env
+          ports:
+            - name: http
+              containerPort: 45678
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {}
+---
+# Source: headerschart/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: RELEASE-NAME-headerschart
+  labels:
+    helm.sh/chart: headerschart-0.1.0
+    app.kubernetes.io/name: headerschart
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: "headers.local"
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: RELEASE-NAME-headerschart
+                port:
+                  number: 80
+---
+# Source: headerschart/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "RELEASE-NAME-headerschart-test-connection"
+  labels:
+    helm.sh/chart: headerschart-0.1.0
+    app.kubernetes.io/name: headerschart
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['RELEASE-NAME-headerschart:80']
+  restartPolicy: Never

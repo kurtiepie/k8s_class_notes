@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: frontend
+  labels:
+    run: frontend-pod
+  name: frontend-pod
+spec:
+  containers:
+  - image: alpine
+    name: frontend-pod
+    command: [ "/bin/sh", "-c", "--" ]
+    args: [ "while :; do sleep 30; done;" ]
